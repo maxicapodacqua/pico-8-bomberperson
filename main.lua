@@ -141,6 +141,7 @@ function update_game()
 
     if fget(mget(new_x/8, enemy.y /8), 0) then
       enemy.dir_x *= -1
+      break
     end
     enemy.x = enemy.x +  enemy.dir_x * 8
 
@@ -148,6 +149,7 @@ function update_game()
 
     if fget(mget(enemy.x/8, new_y /8), 0) then
       enemy.dir_y *= -1
+      break
     end
     enemy.y = enemy.y +  enemy.dir_y * 8
 
