@@ -38,6 +38,8 @@ function spawn()
           alive = true,
           dir_x = 1, -- moving to the right
           dir_y = 0,
+          timer = 0,
+          clock_step = flr(rnd({25,30}))
         })
         mset(i,j,0)
       end
@@ -50,6 +52,8 @@ function spawn()
           alive = true,
           dir_x = 0,
           dir_y = 1, -- moving up
+          timer = 0,
+          clock_step = flr(rnd({25,30}))
         })
         mset(i,j,0)
       end
@@ -154,8 +158,13 @@ function update_game()
 		end
 	end
 
-  enemies_timer += 1
+  -- enemies_timer += 1
   for enemy in all(enemies) do
+    enemy.timer += 1
+    printh("enemy timer :" .. enemy.timer)
+  end
+  for enemy in all(enemies) do
+
     -- collision with player
     local player_rect, enemy_rect = to_rect(player), to_rect(enemy)
     if collide_rect(enemy_rect, player_rect) then
@@ -163,30 +172,28 @@ function update_game()
         _update_func = state_dead
     end
     -- clock for enemies moves
-    if enemies_timer % 30 != 0 then
-      break
+    -- LUA DOESNT HAVE `continue`
+    if enemy.timer % enemy.clock_step == 0 then
+      -- enemies moves
+      local new_x = enemy.x +  enemy.dir_x * 8
+
+      if fget(mget(new_x/8, enemy.y /8), 0) then
+        enemy.dir_x *= -1
+        break
+      end
+      enemy.x = enemy.x +  enemy.dir_x * 8
+
+      local new_y = enemy.y +  enemy.dir_y * 8
+
+      if fget(mget(enemy.x/8, new_y /8), 0) then
+        enemy.dir_y *= -1
+        break
+      end
+      enemy.y = enemy.y +  enemy.dir_y * 8
+
+      sfx(4)
+
     end
-    enemies_timer = 0
-
-    -- enemies moves
-    local new_x = enemy.x +  enemy.dir_x * 8
-
-    if fget(mget(new_x/8, enemy.y /8), 0) then
-      enemy.dir_x *= -1
-      break
-    end
-    enemy.x = enemy.x +  enemy.dir_x * 8
-
-    local new_y = enemy.y +  enemy.dir_y * 8
-
-    if fget(mget(enemy.x/8, new_y /8), 0) then
-      enemy.dir_y *= -1
-      break
-    end
-    enemy.y = enemy.y +  enemy.dir_y * 8
-
-    sfx(4)
-
   end
 end
 
