@@ -132,11 +132,19 @@ function update_game()
 
   enemies_timer += 1
   for enemy in all(enemies) do
-    if enemies_timer % 60 != 0 then
+    -- collision with player
+    local player_rect, enemy_rect = to_rect(player), to_rect(enemy)
+    if collide_rect(enemy_rect, player_rect) then
+        player.alive = false
+        _update_func = state_dead
+    end
+    -- clock for enemies moves
+    if enemies_timer % 30 != 0 then
       break
     end
     enemies_timer = 0
 
+    -- enemies moves
     local new_x = enemy.x +  enemy.dir_x * 8
 
     if fget(mget(new_x/8, enemy.y /8), 0) then
@@ -152,6 +160,7 @@ function update_game()
       break
     end
     enemy.y = enemy.y +  enemy.dir_y * 8
+
 
   end
 end
