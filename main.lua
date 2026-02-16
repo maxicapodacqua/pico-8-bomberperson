@@ -120,12 +120,21 @@ function update_game()
 		end
 
 		if bomb.time_left <= 30 then
+      bomb.show_blasts = true
 			for blast in all(bomb.blasts) do
+        -- check for player collision
 				local blast_rect, player_rect = to_rect(blast), to_rect(player)
 				if collide_rect(player_rect, blast_rect) then
 					player.alive = false
 					_update_func = state_dead
 				end
+        for enemy in all(enemies) do
+          local enemy_rect = to_rect(enemy)
+          if collide_rect(enemy_rect, blast_rect) then
+            enemy.alive = false
+            del(enemies, enemy)
+          end
+        end
 			end
 		end
 	end
@@ -189,7 +198,7 @@ function draw_game()
 		mset(b_tile_x, b_tile_y, 224)
 
 		-- blasts
-		if bomb.time_left <= 30 then
+		if bomb.show_blasts then
 			for blast in all(bomb.blasts) do
 				local blast_tile_x, blast_tile_y = blast.x / 8, blast.y / 8
 
@@ -227,6 +236,7 @@ function add_bomb(x, y)
 		x = x,
 		y = y,
 		time_left = 120,
+    show_blasts = false,
 		blasts = {
 			{
 				x = x,
