@@ -3,15 +3,7 @@ function _init()
 	_update_func = update_game
 	_draw_func = draw_game
 
-  spawn()
-
-	bombs_limit = 2
-
-	bombs = {}
-end
-
-function spawn()
-
+  -- init player with default position, spawn will find right location
 	player = {
 		x = 8,
 		y = 8,
@@ -19,13 +11,46 @@ function spawn()
 		flip_x = false,
 		alive = true,
 	}
+  enemies_timer=0
+  enemies = {}
+	bombs_limit = 2
+	bombs = {}
 
+  spawn()
+
+end
+
+function spawn()
   for i = 0, 15 do
     for j = 0, 15 do
       -- Found player
       if mget(i, j) == 240 then
         player.x = i * 8
         player.y = j * 8
+        mset(i,j,0)
+      end
+      if mget(i, j) == 208 then
+        add(enemies, {
+          x= i*8,
+          y = j *8,
+          sprite =208,
+          flip_x = false,
+          alive = true,
+          dir_x = 1, -- moving to the right
+          dir_y = 0,
+        })
+        mset(i,j,0)
+      end
+      if mget(i, j) == 209 then
+        add(enemies, {
+          x= i*8,
+          y = j *8,
+          sprite =209,
+          flip_x = false,
+          alive = true,
+          dir_x = 0,
+          dir_y = 1, -- moving up
+        })
         mset(i,j,0)
       end
     end
@@ -45,8 +70,6 @@ function state_dead()
 end
 
 function update_game()
-	-- Game update logic goes here
-
 	-- Make character move one tile at a time, each tile is 8x8 pixels
 	local move_x, move_y = 0, 0
 	-- left
@@ -106,6 +129,29 @@ function update_game()
 			end
 		end
 	end
+
+  enemies_timer += 1
+  for enemy in all(enemies) do
+    if enemies_timer % 60 != 0 then
+      break
+    end
+    enemies_timer = 0
+
+    local new_x = enemy.x +  enemy.dir_x * 8
+
+    if fget(mget(new_x/8, enemy.y /8), 0) then
+      enemy.dir_x *= -1
+    end
+    enemy.x = enemy.x +  enemy.dir_x * 8
+
+    local new_y = enemy.y +  enemy.dir_y * 8
+
+    if fget(mget(enemy.x/8, new_y /8), 0) then
+      enemy.dir_y *= -1
+    end
+    enemy.y = enemy.y +  enemy.dir_y * 8
+
+  end
 end
 
 function draw_game()
@@ -158,6 +204,11 @@ function draw_game()
 		end
 	end
 	spr(player.sprite, player.x, player.y, 1, 1, player.flip_x)
+
+  -- render enemies
+  for enemy in all(enemies) do
+	  spr(enemy.sprite, enemy.x, enemy.y, 1, 1, enemy.flip_x)
+  end
 end
 
 function add_bomb(x, y)
