@@ -67,6 +67,11 @@ end
 
 function state_dead()
 	printh("dead")
+  -- this is a nasty trick to make the sound play once
+  if not playying_dead_sound then
+    playying_dead_sound = true
+    sfx(5)
+  end
 end
 
 function update_game()
@@ -101,11 +106,16 @@ function update_game()
 	if fget(tile, 0) then
 		return
 	end
+  -- if player moves, play sound
+  if player.x != final_x or player.y != final_y then
+    sfx(0)
+  end
 	player.x = final_x
 	player.y = final_y
 
 	-- Add bomb
 	if btnp(5) and #bombs < bombs_limit then
+    sfx(1)
 		add_bomb(final_x, final_y)
 	end
 
@@ -120,7 +130,11 @@ function update_game()
 		end
 
 		if bomb.time_left <= 30 then
-      bomb.show_blasts = true
+      if not bomb.show_blasts then
+        bomb.show_blasts = true
+        sfx(2)
+      end
+
 			for blast in all(bomb.blasts) do
         -- check for player collision
 				local blast_rect, player_rect = to_rect(blast), to_rect(player)
@@ -132,6 +146,7 @@ function update_game()
           local enemy_rect = to_rect(enemy)
           if collide_rect(enemy_rect, blast_rect) then
             enemy.alive = false
+            sfx(3)
             del(enemies, enemy)
           end
         end
@@ -170,6 +185,7 @@ function update_game()
     end
     enemy.y = enemy.y +  enemy.dir_y * 8
 
+    sfx(4)
 
   end
 end
